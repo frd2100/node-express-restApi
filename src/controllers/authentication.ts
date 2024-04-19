@@ -3,7 +3,7 @@ import { getUserByEmail, createUser } from '../db/users';
 import { random, authentication } from '../helpers/index';
 
 
-export const register = async(req: express.Request, res: express.Resposnse) => {
+export const register = async(req: express.Request, res: express.Response) => {
     try {
         const{ email, password, username } = req.body;
 
@@ -11,18 +11,19 @@ export const register = async(req: express.Request, res: express.Resposnse) => {
             return res.sendStatus(400);
         }
 
-        const existingUser = await getUserByEmail;
+        const existingUser = await getUserByEmail(email);
         if(existingUser) {
             return res.sendStatus(400);
         }
 
         const salt= random();
+        const hashedPassword =  authentication(salt, password);
         const user = await createUser({
             email,
             username,
             authentication: {
                 salt,
-                password: authentication(salt, password),
+                password: hashedPassword,
             }
         });
         return res.status(200).json(user).end();
